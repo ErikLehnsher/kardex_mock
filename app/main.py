@@ -1,30 +1,35 @@
+from fastapi import FastAPI
 import requests
-import json
 
-ODOO_URL = "http://192.168.62.100:8069/cds_connector/kardex_pps"   # Thay IP máy Odoo
+app = FastAPI()
 
-payload = [
-    {
-        "orderName": "WH/PC/40820",
-        "materialName": "HW.010.0014_B",
-        "quantity": 96,
-        "directionType": "PICK",
-        "lineNumber": 1,
-        "lot": "TESTLOT001"
-    },
-    {
-        "orderName": "WH/PC/40820",
-        "materialName": "BA.010.0184_E2",
-        "quantity": 48,
-        "directionType": "PICK",
-        "lineNumber": 2,
-        "lot": "TESTLOT002"
-    }
-]
+WEBHOOK = "https://expliseat.odoo.com/cds_connector/kardex_pps"
 
-headers = {"Content-Type": "application/json"}
+@app.get("/send_kardex")
+def send_kardex():
+    payload = [
+        {
+            "lot": "24LAN00017",
+            "info1": "WH/MO/05925-001",
+            "quantity": 96,
+            "orderName": "WH/PC/40820",
+            "lineNumber": 1,
+            "materialName": "HW.010.0014_B", 
+            "directionType": "PICK"
+        },
+        {
+            "lot": "25RM001665",
+            "info1": "WH/MO/05925-001",
+            "quantity": 48,
+            "orderName": "WH/PC/40820",
+            "lineNumber": 2,
+            "materialName": "BA.010.0184_E2",
+            "directionType": "PICK"
+        }
+    ]
 
-response = requests.post(ODOO_URL, data=json.dumps(payload), headers=headers)
+    headers = {"Content-Type": "application/json"}
 
-print("Status:", response.status_code)
-print("Response:", response.text)
+    r = requests.post(WEBHOOK, json=payload, headers=headers)
+
+    return {"status": r.status_code, "response": r.text}
